@@ -5,8 +5,8 @@
   "rowFormatter": {
     "elmType": "div",
     "style": {
-      "height": "=if(@rowIndex == 0, '7.3em', '3em')",
-      "display": "block",
+      "height": "=if(@rowIndex == 1, '6.5em', '3em')",
+      "display": "=if(((Number([$ProjektDatumAuftrag]) || Number([$ProjektDatumVor_x002d_Ort_x002d_]) ) > (Number(@now) - 86400000 * 365/2)),'block' , 'none')",
       "width": "100%"
     },
     "children": [
@@ -17,7 +17,7 @@
         },
         "style": {
           "width": "100%",
-          "display": "=if(@rowIndex == 0, 'flex', 'none')",
+          "display": "=if(@rowIndex == 1, 'flex', 'none')",
           "height": "3em",
           "padding": ".2em",
           "font-weight": "bold"
@@ -25,11 +25,11 @@
         "children": [
           {
             "elmType": "div",
-            "txtContent": "Task",
+            "txtContent": "ID Kunde",
             "style": {
               "width": "220px",
               "text-align": "left",
-              "padding-left": "0.4em",
+              "padding-left": "0.3em",
               "box-sizing": "border-box"
             },
             "attributes": {
@@ -49,14 +49,14 @@
             "children": [
               {
                 "elmType": "span",
-                "txtContent": "=toLocaleDateString(Date('12/26/2020'))",
+                "txtContent": "=toLocaleDateString(@now - (86400000 * 365/2))",
                 "style": {
                   "text-align": "left"
                 }
               },
               {
                 "elmType": "span",
-                "txtContent": "=toLocaleDateString(Date('12/26/2022'))",
+                "txtContent": "=toLocaleDateString(@now + (86400000 * 365/4))",
                 "style": {
                   "position": "absolute",
                   "right": "0"
@@ -69,8 +69,8 @@
                   "position": "relative",
                   "width": "100px",
                   "z-index": "100",
-                  "display": "=if(Date('12/26/2022') < @now , 'none', 'block')",
-                  "left": "=floor( (Number(@now)-Number(Date('12/26/2020'))) / (Number(Date('12/26/2022'))-Number(Date('12/26/2020'))) * 100 ) + '%'"
+                  "display": "=if(@now + (86400000 * 365/4) < @now , 'none', 'block')",
+                  "left": "=floor( (Number(@now)-Number(@now - (86400000 * 365/2))) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))) * 100 ) + '%'"
                 }
               }
             ]
@@ -81,22 +81,11 @@
         "elmType": "div",
         "style": {
           "width": "100%",
-          "display": "flex",
-          "padding": "0.2em"
+          "padding": "0.5em",
+          "position": "relative",
+          "top": "-3em"
         },
         "children": [
-          {
-            "elmType": "span",
-            "style": {
-              "width": "21px",
-              "padding-top": "0.55em"
-            },
-            "attributes": {
-              "iconName": "=if([$ProjektFortschritt] >= 1, 'CompletedSolid', if([$ProjektDatumAbschluss] > Date('12/26/2022'), 'WarningSolid', if([$ProjektDatumVor_x002d_Ort_x002d_] > @now, 'Calendar', if([$ProjektDatumAbschluss] < @now, 'AlarmClock', 'CircleRing'))))",
-              "title": "=if([$ProjektFortschritt] >= 1, 'Complete', if([$ProjektDatumAbschluss] > Date('12/26/2022'), 'Due date is past project due date', if([$ProjektDatumVor_x002d_Ort_x002d_] > @now, 'Upcoming task', if([$ProjektDatumAbschluss] < @now, 'Overdue', 'In progress'))))",
-              "class": "='ms-fontSize-16 ms-fontColor-' + if([$ProjektFortschritt] >= 1, 'sharedGreen20', if([$ProjektDatumAbschluss] > Date('12/26/2022'), 'sharedRed20', if([$ProjektDatumVor_x002d_Ort_x002d_] > @now, 'gray100', if([$ProjektDatumAbschluss]< @now, 'sharedRed20', 'sharedCyanBlue20'))))"
-            }
-          },
           {
             "elmType": "button",
             "txtContent": "=[$ProjektID] + ' ' + [$KundeName]",
@@ -104,11 +93,15 @@
               "action": "editProps"
             },
             "style": {
+              "position" : "relative",
+              "top" : "2.1em",
+              "height": "3em",
               "width": "199px",
               "max-height": "2em",
               "padding": "0",
-              "border": "none",
-              "background-color": "transparent",
+              "border": "hidden",
+              "z-index": "99",
+              "background-color": "white",
               "cursor": "pointer",
               "text-decoration": "none",
               "text-align": "left",
@@ -138,12 +131,10 @@
             "children": [
               {
                 "elmType": "div",
-                "txtContent": "=toLocaleDateString([$ProjektDatumVor_x002d_Ort_x002d_]) + ' - ' + toLocaleDateString([$ProjektDatumAbschluss])",
                 "style": {
-                  "position": "relative",
+                  "position": "absolute",
                   "box-sizing": "border-box",
                   "display": "flex",
-                  "border-radius": "1em",
                   "z-index": "1",
                   "top": "0.2em",
                   "height": "3em",
@@ -154,30 +145,173 @@
                   "line-height": "12px",
                   "border-width": "1px",
                   "border-style": "solid",
-                  "left": "=  (Number([$ProjektDatumVor_x002d_Ort_x002d_])-Number(Date('12/26/2020'))) / (Number(Date('12/26/2022'))-Number(Date('12/26/2020'))) * 100  + '%'",
-                  "width": "= if( [$ProjektDatumAbschluss] > Date('12/26/2022'),  (Number(Date('12/26/2022'))-Number([$ProjektDatumVor_x002d_Ort_x002d_])+ 86400000) / (Number(Date('12/26/2022'))-Number(Date('12/26/2020'))+ 86400000) * 100  ,  (Number([$ProjektDatumAbschluss])-Number([$ProjektDatumVor_x002d_Ort_x002d_])+ 86400000) / (Number(Date('12/26/2022'))-Number(Date('12/26/2020'))+ 86400000) * 100 ) + '%'"
+                  "left": "=  (Number([$ProjektDatumAuftrag])- 3*86400000 -Number(@now - (86400000 * 365/2))) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))) * 100  + '%'",
+                  "width": "1em"
                 },
                 "attributes": {
-                  "title": "=[$ProjektID] + ' - ' + toLocaleDateString([$ProjektDatumVor_x002d_Ort_x002d_]) + ' - ' + toLocaleDateString([$ProjektDatumAbschluss])",
-                  "class": "=if([$ProjektFortschritt] >= 1, 'ms-borderColor-sharedGreen20 ms-bgColor-sharedYellowGreen10', if([$ProjektDatumAbschluss] > Date('12/26/2022'), 'ms-borderColor-sharedRed20 ms-bgColor-sharedRed10', if([$ProjektDatumVor_x002d_Ort_x002d_] > @now, 'ms-borderColor-gray100 ms-bgColor-gray40', if([$ProjektDatumAbschluss]< @now, 'ms-borderColor-sharedRed20 ms-bgColor-sharedRed10', 'ms-borderColor-sharedCyanBlue20 ms-bgColor-sharedCyanBlue10'))))"
+                  "title": "='#' + [$ProjektID] + ' Projektauftrag: ' + toLocaleDateString([$ProjektDatumAuftrag])",
+                  "class": "ms-borderColor-gray50 ms-bgColor-gray50"
+                }
+              },
+              {
+                "elmType": "div",
+                "style": {
+                  "position": "absolute",
+                  "box-sizing": "border-box",
+                  "display": "flex",
+                  "z-index": "2",
+                  "top": "0.2em",
+                  "height": "3em",
+                  "overflow": "hidden",
+                  "word-break": "break-word",
+                  "padding": "0.2em 0.4em",
+                  "font-size": "10px",
+                  "line-height": "12px",
+                  "border-width": "1px",
+                  "border-style": "solid",
+                  "left": "=  (Number([$ProjektDatumVor_x002d_Ort_x002d_])-2*70000000-Number(@now - (86400000 * 365/2))) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))) * 100  + '%'",
+                  "width": "1em"
+                },
+                "attributes": {
+                  "title": "='#' + [$ProjektID] + ' Vor-Ort-Termin: ' + toLocaleDateString([$ProjektDatumVor_x002d_Ort_x002d_])",
+                  "class": "ms-borderColor-gray90 ms-bgColor-gray90"
+                }
+              },
+              {
+                "elmType": "div",
+                "style": {
+                  "position": "absolute",
+                  "box-sizing": "border-box",
+                  "display": "flex",
+                  "z-index": "6",
+                  "top": "0.2em",
+                  "height": "3em",
+                  "overflow": "hidden",
+                  "word-break": "break-word",
+                  "padding": "0.2em 0.4em",
+                  "font-size": "10px",
+                  "line-height": "12px",
+                  "border-width": "1px",
+                  "border-style": "solid",
+                  "left": "=  (Number([$ProjektDatumAbschluss])+60400000-Number(@now - (86400000 * 365/2))) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))) * 100  + '%'",
+                  "width": "1em"
+                },
+                "attributes": {
+                  "title": "='#' + [$ProjektID] + ' Abschlusstermin iSFP: ' + toLocaleDateString([$ProjektDatumAbschluss])",
+                  "class": "ms-borderColor-black ms-bgColor-black"
+                }
+              },
+              {
+                "elmType": "div",
+                "style": {
+                  "position": "absolute",
+                  "box-sizing": "border-box",
+                  "display": "flex",
+                  "z-index": "7",
+                  "top": "0.2em",
+                  "height": "3em",
+                  "overflow": "hidden",
+                  "word-break": "break-word",
+                  "padding": "0.2em 0.4em",
+                  "font-size": "10px",
+                  "line-height": "12px",
+                  "border-width": "1px",
+                  "border-style": "solid",
+                  "left": "=  (Number([$ProjektDatumProjektendeRechnung])+2*93400000-Number(@now - (86400000 * 365/2))) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))) * 100  + '%'",
+                  "width": "1em"
+                },
+                "attributes": {
+                  "title": "='#' + [$ProjektID] + ' Projektende Rechnung: ' + toLocaleDateString([$ProjektDatumProjektendeRechnung])",
+                  "class": "ms-borderColor-sharedCyanBlue20 ms-bgColor-sharedCyanBlue20"
+                }
+              },
+              {
+                "elmType": "div",
+                "style": {
+                  "position": "absolute",
+                  "box-sizing": "border-box",
+                  "display": "=if((indexOf(toString([$ProjektDatumAbschluss] + '^'), '^') == 0) && (indexOf(toString([$ProjektDatumProjektendeRechnung] + '^'), '^') == 0) && (indexOf(toString([$ProjektDatumVor_x002d_Ort_x002d_] + '^'), '^') != 0), 'flex', 'none')",
+                  "z-index": "3",
+                  "top": "0.2em",
+                  "height": "3em",
+                  "overflow": "hidden",
+                  "word-break": "break-word",
+                  "padding": "0.2em 0.4em",
+                  "font-size": "10px",
+                  "line-height": "12px",
+                  "border-width": "1px",
+                  "border-style": "solid",
+                  "left": "=  (Number([$ProjektDatumVor_x002d_Ort_x002d_])-Number(@now - (86400000 * 365/2))) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))) * 100  + '%'",
+                  "width": "= ( ((Number([$ProjektDatumVor_x002d_Ort_x002d_]) + (86400000 * 42))-Number([$ProjektDatumVor_x002d_Ort_x002d_])+ 86400000) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))+ 86400000) * 100  + '%'"
+                },
+                "attributes": {
+                  "title": "='#' + [$ProjektID] + ' Bearbeitungszeitraum SOLL (42 Tage): ' + toLocaleDateString([$ProjektDatumVor_x002d_Ort_x002d_]) + ' - ' + toLocaleDateString([$ProjektDatumAbschluss])",
+                  "class": "ms-borderColor-gray40 ms-bgColor-gray40"
+                }
+              },
+              {
+                "elmType": "div",
+                "style": {
+                  "position": "absolute",
+                  "box-sizing": "border-box",
+                  "display": "=if((indexOf(toString([$ProjektDatumAbschluss] + '^'), '^') == 0) && (indexOf(toString([$ProjektDatumProjektendeRechnung] + '^'), '^') == 0) && (indexOf(toString([$ProjektDatumVor_x002d_Ort_x002d_] + '^'), '^') != 0)  && ([$ProjektDatumVor_x002d_Ort_x002d_] < @now), 'flex', 'none')",
+                  "z-index": "4",
+                  "top": "0.2em",
+                  "height": "3em",
+                  "overflow": "hidden",
+                  "word-break": "break-word",
+                  "padding": "0.2em 0.4em",
+                  "font-size": "10px",
+                  "line-height": "12px",
+                  "border-width": "1px",
+                  "border-style": "solid",
+                  "left": "=  (Number([$ProjektDatumVor_x002d_Ort_x002d_])-Number(@now - (86400000 * 365/2))) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))) * 100  + '%'",
+                  "width": "=  (Number(@now)-Number([$ProjektDatumVor_x002d_Ort_x002d_])) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))+ 86400000) * 100 + '%'"
+                },
+                "attributes": {
+                  "title": "='#' + [$ProjektID] + ' Bearbeitungsfortschritt: ' + [$ProjektFortschritt] *100 + ' % ' ",
+                  "class": "=if([$ProjektFortschritt] >= ((Number(@now)-Number([$ProjektDatumVor_x002d_Ort_x002d_]))/(42 * 86400000)), 'ms-borderColor-sharedYellowGreen10 ms-bgColor-sharedYellowGreen10',  'ms-borderColor-sharedYellow10 ms-bgColor-sharedYellow10')"
+                }
+              },
+              {
+                "elmType": "div",
+                "style": {
+                  "position": "absolute",
+                  "box-sizing": "border-box",
+                  "display": "=if((indexOf(toString([$ProjektDatumAbschluss] + '^'), '^') != 0) || (indexOf(toString([$ProjektDatumProjektendeRechnung] + '^'), '^') != 0), 'flex', 'none')",
+                  "z-index": "5",
+                  "top": "0.2em",
+                  "height": "3em",
+                  "overflow": "hidden",
+                  "word-break": "break-word",
+                  "padding": "0.2em 0.4em",
+                  "font-size": "10px",
+                  "line-height": "12px",
+                  "border-width": "1px",
+                  "border-style": "solid",
+                  "left": "=  (Number([$ProjektDatumVor_x002d_Ort_x002d_])-10400000-Number(@now - (86400000 * 365/2))) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))) * 100  + '%'",
+                  "width": "= if( [$ProjektDatumAbschluss] > @now + (86400000 * 365/4),  (Number(@now + (86400000 * 365/4))-Number([$ProjektDatumVor_x002d_Ort_x002d_])+ 86400000) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))+ 86400000) * 100  ,  (Number([$ProjektDatumAbschluss])-Number([$ProjektDatumVor_x002d_Ort_x002d_])+ 86400000) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))+ 86400000) * 100 ) + '%'"
+                },
+                "attributes": {
+                  "title": "='#' + [$ProjektID] + ' Bearbeitungszeitraum: ' + toLocaleDateString([$ProjektDatumVor_x002d_Ort_x002d_]) + ' - ' + toLocaleDateString([$ProjektDatumAbschluss])",
+                  "class": "ms-borderColor-green ms-bgColor-green"
                 }
               },
               {
                 "elmType": "span",
                 "attributes": {
                   "title": "=toLocaleDateString(@now)",
-                  "class": "ms-borderColor-gray40"
+                  "class": "ms-borderColor-gray90"
                 },
                 "style": {
                   "position": "relative",
-                  "display": "=if(Date('12/26/2022') < @now , 'none', 'block')",
-                  "top": "-2.6em",
+                  "display": "=if(@now + (86400000 * 365/4) < @now , 'none', 'block')",
                   "z-index": "100",
-                  "border-left-width": "5px",
+                  "border-left-width": "3px",
                   "border-left-style": "solid",
                   "height": "3em",
-                  "width": "1em",
-                  "left": "=(Number(@now)-Number(Date('12/26/2020'))) / (Number(Date('12/26/2022'))-Number(Date('12/26/2020'))) * 100 + '%'"
+                  "width": "0.5em",
+                  "left": "=(Number(@now)-Number(@now - (86400000 * 365/2))) / (Number(@now + (86400000 * 365/4))-Number(@now - (86400000 * 365/2))) * 100 + '%'"
                 }
               }
             ]
